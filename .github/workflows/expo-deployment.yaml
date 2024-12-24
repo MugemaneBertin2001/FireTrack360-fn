@@ -4,19 +4,17 @@ on:
       - main
 
 jobs:
-  Publish:
+  update:
     runs-on: ubuntu-latest
     steps:
       - name: 🏗 Setup repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
+        uses: actions/checkout@v3
 
       - name: 🏗 Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: 20.x
-          cache: npm
+          node-version: 18.x
+          cache: yarn
 
       - name: 🏗 Setup EAS
         uses: expo/expo-github-action@v8
@@ -25,26 +23,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: 📦 Install dependencies
-        run: |
-          npm install
-          npx expo install --fix
+        run: npm install
 
-      - name: 🚀 Build Android App
-        run: eas build --platform android --profile $PROFILE --non-interactive
-        env:
-          EXPO_PUBLIC_GRAPHQL_ENDPOINT: ${{ secrets.EXPO_PUBLIC_GRAPHQL_ENDPOINT }}
-          PROFILE: ${{ secrets.PROFILE }}
-
-      
-
-      - name: 🚀 Build & Submit ios App
-        run: |
-          rm -f .easignore
-          cp .gitignore .easignore
-          echo '\npackage-lock.json' >> .easignore
-          eas build --platform ios --profile $PROFILE --auto-submit --non-interactive
-          rm .easignore
-        env:
-          EXPO_PUBLIC_GRAPHQL_ENDPOINT: ${{ secrets.EXPO_PUBLIC_GRAPHQL_ENDPOINT }}
-          PROFILE: ${{ secrets.PROFILE }}
-        
+      - name: 🚀 Create update
+        run: eas update --auto --non-interactive
