@@ -27,3 +27,7 @@ jobs:
 
       - name: 🚀 Create update
         run: eas update --auto --non-interactive
+      - name: 🔨 Create preview build
+        run: |
+          eas build --platform android --profile preview --non-interactive --no-wait
+          echo "Preview build started! Check the build status at https://expo.dev/accounts/mugemanebertin/projects/firesecure360/builds"
