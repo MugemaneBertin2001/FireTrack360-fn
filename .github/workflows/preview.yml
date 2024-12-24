@@ -1,0 +1,82 @@
+name: Preview Build
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'Build profile to use'
+        required: false
+        default: 'preview'
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🏗 Setup repo
+        uses: actions/checkout@v3
+
+      - name: 🏗 Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: yarn
+
+      - name: 📦 Install dependencies
+        run: yarn install
+
+      - name: 🏗 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 🔧 Configure Keystore
+        env:
+          EXPO_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.EXPO_ANDROID_KEYSTORE_PASSWORD }}
+          EXPO_ANDROID_KEY_PASSWORD: ${{ secrets.EXPO_ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "Configuring Android keystore..."
+          mkdir -p android/app
+          keytool -genkeypair \
+            -v \
+            -keystore android/app/release.keystore \
+            -alias androiddebugkey \
+            -storepass "$EXPO_ANDROID_KEYSTORE_PASSWORD" \
+            -keypass "$EXPO_ANDROID_KEY_PASSWORD" \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US" \
+            -noprompt
+
+      - name: 🔧 Update app config
+        run: |
+          # Remove the old project ID from app.json if it exists
+          if [ -f "app.json" ]; then
+            jq 'del(.expo.extra.eas.projectId)' app.json > temp.json && mv temp.json app.json
+          fi
+          # Force initialize with new project ID
+          eas init --id ${{ secrets.EXPO_PROJECT_ID }} --non-interactive
+
+      - name: 🔨 Create build
+        env:
+          BUILD_PROFILE: ${{ github.event.inputs.profile || secrets.PROFILE || 'preview' }}
+        run: |
+          echo "Starting build with profile: $BUILD_PROFILE"
+          BUILD_OUTPUT=$(eas build --platform android --profile $BUILD_PROFILE --non-interactive --json || true)
+          BUILD_URL=$(echo $BUILD_OUTPUT | jq -r '.buildUrl // empty')
+          echo "BUILD_URL=${BUILD_URL:-https://expo.dev/accounts/mugemanebertin/projects/firesecure360/builds}" >> $GITHUB_ENV
+          
+      - name: 📝 Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `📱 Build started with profile: ${process.env.BUILD_PROFILE}\n\nYou can check the build status here: ${process.env.BUILD_URL}`
+            })
