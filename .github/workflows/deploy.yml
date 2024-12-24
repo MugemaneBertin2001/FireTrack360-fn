@@ -53,5 +53,5 @@ jobs:
             docker rm firesecure360 || true
             docker run -d \
               --name firesecure360 \
-                -p 80:80 \
+                -p 8081:8081 \
               ${{ secrets.DOCKER_USERNAME }}/firesecure360:latest  
