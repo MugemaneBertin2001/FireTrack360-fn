@@ -48,9 +48,11 @@ jobs:
           EXPO_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.EXPO_ANDROID_KEYSTORE_PASSWORD }}
           EXPO_ANDROID_KEY_PASSWORD: ${{ secrets.EXPO_ANDROID_KEY_PASSWORD }}
         run: |
+          mkdir -p android/app
           if [ ! -z "$EXPO_ANDROID_KEYSTORE_BASE64" ]; then
             echo $EXPO_ANDROID_KEYSTORE_BASE64 | base64 --decode > android/app/keystore.jks
-            echo "storeFile=keystore.jks" >> android/keystore.properties
+            mkdir -p android
+            echo "storeFile=android/app/keystore.jks" > android/keystore.properties
             echo "storePassword=$EXPO_ANDROID_KEYSTORE_PASSWORD" >> android/keystore.properties
             echo "keyAlias=$EXPO_ANDROID_KEYSTORE_ALIAS" >> android/keystore.properties
             echo "keyPassword=$EXPO_ANDROID_KEY_PASSWORD" >> android/keystore.properties
