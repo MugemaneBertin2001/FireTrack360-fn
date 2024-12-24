@@ -42,6 +42,14 @@
     "experiments": {
       "typedRoutes": true
     },
-    "owner": "mugemanebertin"
+    "owner": "mugemanebertin",
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "765e3ce7-ab04-4a17-9467-a789780c8661"
+      }
+    }
   }
 }
