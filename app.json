@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "FireSecure360",
-    "slug": "FireSecure360",
+    "slug": "firesecure360",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "FireSecure360",
+    "scheme": "firesecure360",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "assetBundlePatterns": [
