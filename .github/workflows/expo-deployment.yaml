@@ -32,7 +32,9 @@ jobs:
       - name: 🚀 Build Android App
         run: eas build --platform android --profile $PROFILE --non-interactive
         env:
-          PROFILE: ${{ secrets.EXPO_PUBLIC_GRAPHQL_ENDPOINT }}
+          EXPO_PUBLIC_GRAPHQL_ENDPOINT: ${{ secrets.EXPO_PUBLIC_GRAPHQL_ENDPOINT }}
+          PROFILE: ${{ secrets.PROFILE }}
+
       
 
       - name: 🚀 Build & Submit ios App
@@ -43,5 +45,6 @@ jobs:
           eas build --platform ios --profile $PROFILE --auto-submit --non-interactive
           rm .easignore
         env:
-          PROFILE: ${{ secrets.EXPO_PUBLIC_GRAPHQL_ENDPOINT }}
+          EXPO_PUBLIC_GRAPHQL_ENDPOINT: ${{ secrets.EXPO_PUBLIC_GRAPHQL_ENDPOINT }}
+          PROFILE: ${{ secrets.PROFILE }}
         
