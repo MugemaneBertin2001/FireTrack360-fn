@@ -1,15 +1,16 @@
 # .github/workflows/docker-deploy.yml
 
-name: Deploy to DigitalOcean with Docker
+name: Deploy to DigitalOcean
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]  # or your default branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -20,26 +21,26 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
+      - name: Build and push
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/firesecure360:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/firesecure360-frontend:latest
           build-args: |
             EXPO_PUBLIC_GRAPHQL_ENDPOINT=${{ secrets.EXPO_PUBLIC_GRAPHQL_ENDPOINT }}
 
-      - name: Deploy to Digital Ocean
+      - name: Deploy to DigitalOcean
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.DO_HOST }}
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_PRIVATE_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/firesecure360:latest
-            docker stop web-app || true
-            docker rm web-app || true
+            docker pull ${{ secrets.DOCKER_USERNAME }}/firesecure360-frontend:latest
+            docker stop firesecure360-frontend || true
+            docker rm firesecure360-frontend || true
             docker run -d \
-              --name web-app \
+              --name firesecure360-frontend \
               -p 80:80 \
-              your-dockerhub-username/your-app:latest
+              ${{ secrets.DOCKER_USERNAME }}/firesecure360-frontend:latest
