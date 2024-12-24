@@ -1,9 +1,7 @@
-# .github/workflows/docker-deploy.yml
-
 name: Deploy to DigitalOcean
 on:
   push:
-    branches: [ main ]  # or your default branch
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -11,6 +9,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      # Cache yarn dependencies
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v3
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -26,7 +37,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/firesecure360-frontend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/firesecure360:latest
           build-args: |
             EXPO_PUBLIC_GRAPHQL_ENDPOINT=${{ secrets.EXPO_PUBLIC_GRAPHQL_ENDPOINT }}
 
@@ -37,10 +48,10 @@ jobs:
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_PRIVATE_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/firesecure360-frontend:latest
-            docker stop firesecure360-frontend || true
-            docker rm firesecure360-frontend || true
+            docker pull ${{ secrets.DOCKER_USERNAME }}/firesecure360:latest
+            docker stop firesecure360 || true
+            docker rm firesecure360 || true
             docker run -d \
-              --name firesecure360-frontend \
-              -p 80:80 \
-              ${{ secrets.DOCKER_USERNAME }}/firesecure360-frontend:latest
+              --name firesecure360 \
+                -p 80:80 \
+              ${{ secrets.DOCKER_USERNAME }}/firesecure360:latest  
