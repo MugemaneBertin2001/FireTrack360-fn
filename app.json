@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "FireTrack360-fn",
-    "slug": "FireTrack360-fn",
+    "name": "FireSecure360",
+    "slug": "FireSecure360",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "FireSecure360",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "assetBundlePatterns": [
